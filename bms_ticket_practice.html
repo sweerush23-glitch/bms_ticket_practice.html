@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BookMyShow – Ticket Practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+}
+
+header {
+    background: #d32f2f;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.container {
+    padding: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.hidden {
+    display: none;
+}
+
+button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button:disabled {
+    background: #aaa;
+}
+
+.timer {
+    color: #d32f2f;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.seats {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.seat {
+    border: 1px solid #4caf50;
+    color: #4caf50;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.seat.selected {
+    background: #4caf50;
+    color: white;
+}
+
+.seat.sold {
+    border-color: #999;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<header>BookMyShow</header>
+
+<div class="container">
+
+<!-- Event Card -->
+<div class="card" id="event">
+    <h3>BTS World Tour 💜</h3>
+    <p>Mumbai • DY Patil Stadium</p>
+    <button onclick="startBooking()">Book Tickets</button>
+</div>
+
+<!-- Seat Selection -->
+<div class="card hidden" id="booking">
+    <h3>Select Seats</h3>
+    <p class="timer">Complete booking in <span id="time">120</span>s</p>
+
+    <div class="seats" id="seatGrid"></div>
+</div>
+
+<!-- Footer Checkout -->
+<div class="footer hidden" id="footer">
+    <button id="payBtn" onclick="checkout()" disabled>
+        Pay ₹<span id="amount">0</span>
+    </button>
+</div>
+
+<!-- Confirmation -->
+<div class="card hidden" id="success">
+    <h2>🎉 Booking Confirmed</h2>
+    <p>Your tickets are booked successfully.</p>
+    <p><b>This was a practice simulation.</b></p>
+</div>
+
+</div>
+
+<script>
+let selected = [];
+let timeLeft = 120;
+let timer;
+
+function startBooking() {
+    document.getElementById("event").classList.add("hidden");
+    document.getElementById("booking").classList.remove("hidden");
+    document.getElementById("footer").classList.remove("hidden");
+    generateSeats();
+    startTimer();
+}
+
+function generateSeats() {
+    const grid = document.getElementById("seatGrid");
+    grid.innerHTML = "";
+
+    for (let i = 1; i <= 48; i++) {
+        const seat = document.createElement("div");
+        seat.className = "seat";
+        seat.innerText = i;
+
+        if (Math.random() < 0.35) {
+            seat.classList.add("sold");
+        } else {
+            seat.onclick = () => toggleSeat(seat, i);
+        }
+
+        grid.appendChild(seat);
+    }
+}
+
+function toggleSeat(seat, num) {
+    if (seat.classList.contains("selected")) {
+        seat.classList.remove("selected");
+        selected = selected.filter(s => s !== num);
+    } else {
+        if (selected.length >= 6) {
+            alert("You can select maximum 6 tickets.");
+            return;
+        }
+        seat.classList.add("selected");
+        selected.push(num);
+    }
+
+    document.getElementById("amount").innerText = selected.length * 4500;
+    document.getElementById("payBtn").disabled = selected.length === 0;
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("time").innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("Session expired. Seats released.");
+            location.reload();
+        }
+    }, 1000);
+}
+
+function checkout() {
+    clearInterval(timer);
+    document.getElementById("booking").classList.add("hidden");
+    document.getElementById("footer").classList.add("hidden");
+    document.getElementById("success").classList.remove("hidden");
+}
+</script>
+
+
+</body>
+</html>
